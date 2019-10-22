@@ -256,6 +256,10 @@ parse_opts() {
 			=*|-*|''|' ') echo >&2 "${SCRIPT}: $2: invalid external path argument" ; exit 255 ;;
 			*/) EXT_SRC=${EXT_SRC%/} ;;
 			esac
+			case ${EXT_SRC%%/*} in
+			.|..) EXT_SRC=${CUR_PATH}/${EXT_SRC} ;;
+			\~) EXT_SRC=${HOME}/${EXT_SRC#\~/} ;;
+			esac
 			shift 2 ;;
 		-i|--cmake-info) install_cmake && cmake_info ; exit 0 ;;
 		-h|--help) usage ; exit 0 ;;
@@ -333,7 +337,6 @@ link_src() {
 		if [ -d ${PROJ_NAME}/${EXT_SRC} ]; then
 			return 0
 		elif [ -d ${external_src} ]; then
-			[ ${external_src%%/*} ] && external_src=${CUR_PATH}/${external_src}
 			ln -s ${external_src} ${PROJ_NAME}/.
 		else
 			echo >&2 "${warn}${EXT_SRC}: Does not exist the specified source directory in ${PROJ_NAME} directory.${norm}"
